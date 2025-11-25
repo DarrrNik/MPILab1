@@ -1,0 +1,7 @@
+15000
+------------------------------------------------
+Matrix-Vector multiplication (row-wise, MPI)
+> Processes         <=> 1
+> Matrix size       <=> 15000 x 15000
+> Execution time    <=> 0.258765s
+------------------------------------------------

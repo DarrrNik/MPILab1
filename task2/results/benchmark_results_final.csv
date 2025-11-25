@@ -1,0 +1,17 @@
+matrix_size,processes,method,parallel_time,sequential_time,speedup,efficiency
+10000,1,block,0,0,0,0
+10000,1,row,0,0,0,0
+10000,1,col,0,0,0,0
+10000,4,block,0,0,0,0
+10000,4,row,0,0,0,0
+10000,4,col,0,0,0,0
+15000,1,block,0,0,0,0
+15000,1,row,0,0,0,0
+15000,1,col,0,0,0,0
+15000,4,block,0,0,0,0
+15000,4,row,0,0,0,0
+15000,4,col,0,0,0,0
+15000,9,block,0,0,0,0
+15000,9,row,0,0,0,0
+15000,9,col,0,0,0,0
+20000,1,block,0,0,0,0

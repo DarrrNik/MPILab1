@@ -1,11 +1,11 @@
 #include <mpi.h>
 #include <fstream>
 #include <sstream>
-#include <format>
 #include <iostream>
 #include <cassert>
 #include <cstdlib>
-#include <ranges>
+#include <ctime>
+#include <vector>
 
 #include "mpilab.hpp"
 
@@ -17,139 +17,126 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &commRank);
     MPI_Comm_size(MPI_COMM_WORLD, &commSize);
 
-    int rows = 0, cols = 0; char* outputFile = nullptr;
-    {
-        int parseRes = ParseCLArguments(argc, argv, commRank, &rows, &cols, &outputFile);
-        if (parseRes != 0)
-        {
-            std::cout << "Invalid command line arguments, check error output" << std::endl;
-            return -parseRes;
+    // Проверяем аргументы командной строки
+    if (argc < 3) {
+        if (commRank == ROOT_PROCESS) {
+            std::cerr << "Usage: " << argv[0] << " <rows> <cols>" << std::endl;
+        }
+        MPI_Finalize();
+        return 1;
+    }
+
+    int rows = std::atoi(argv[1]);
+    int cols = std::atoi(argv[2]);
+    
+    if (rows <= 0 || cols <= 0) {
+        if (commRank == ROOT_PROCESS) {
+            std::cerr << "Error: rows and cols must be positive integers" << std::endl;
+        }
+        MPI_Finalize();
+        return 1;
+    }
+
+    // Проверяем делимость для параллельного случая
+    if (commSize > 1 && rows % commSize != 0) {
+        if (commRank == ROOT_PROCESS) {
+            std::cerr << "Error: rows must be divisible by number of processes" << std::endl;
+            std::cerr << "Rows: " << rows << ", Processes: " << commSize << std::endl;
+        }
+        MPI_Finalize();
+        return 1;
+    }
+
+    // Выделяем память для ROOT процесса
+    double* matrix = nullptr;
+    double* vector = nullptr; 
+    double* result = nullptr;
+    
+    if (commRank == ROOT_PROCESS) {
+        try {
+            matrix = new double[rows * cols];
+            vector = new double[cols];
+            result = new double[rows];
+            
+            // Инициализируем данные
+            std::srand(static_cast<unsigned int>(std::time(nullptr)));
+            for (int i = 0; i < rows * cols; i++) {
+                matrix[i] = static_cast<double>(std::rand() % 100) / 10.0;
+            }
+            for (int i = 0; i < cols; i++) {
+                vector[i] = static_cast<double>(std::rand() % 100) / 10.0;
+            }
+        } catch (const std::bad_alloc& e) {
+            std::cerr << "Memory allocation failed: " << e.what() << std::endl;
+            MPI_Abort(MPI_COMM_WORLD, 1);
         }
     }
 
-    double* matrix = nullptr, * vector = nullptr, * result = nullptr;
-    if (commRank == ROOT_PROCESS)
-    {
-        matrix = new double[rows * cols];
-        vector = new double[rows];
-        result = new double[rows];
-        FillMatrixVectorRows(rows, cols, matrix, vector);
+    // ВСЕ процессы должны иметь вектор
+    double* localVector = new double[cols];
+    
+    // Распределяем вектор по всем процессам
+    if (commRank == ROOT_PROCESS) {
+        // ROOT процесс копирует данные в localVector
+        std::copy(vector, vector + cols, localVector);
     }
+    
+    // Broadcast вектора всем процессам
+    MPI_Bcast(localVector, cols, MPI_DOUBLE, ROOT_PROCESS, MPI_COMM_WORLD);
 
-    double* localMatrix = nullptr, * localResult = nullptr;
-    int localRows = DistributeMatrixRows(rows, cols, matrix, vector, commRank, commSize, &localMatrix);
+    // Распределяем матрицу по строкам
+    int localRows = rows / commSize;
+    double* localMatrix = new double[localRows * cols];
+    double* localResult = new double[localRows];
+
+    // Распределяем матрицу по процессам
+    MPI_Scatter(matrix, localRows * cols, MPI_DOUBLE,
+                localMatrix, localRows * cols, MPI_DOUBLE,
+                ROOT_PROCESS, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
 
-    MultiplyMatrixVectorRows(localRows, cols, localMatrix, vector, &localResult);
-    MPI_Reduce(localResult, result, localRows, MPI_DOUBLE, MPI_SUM, ROOT_PROCESS, MPI_COMM_WORLD);
+    // Умножаем локальную часть матрицы на вектор
+    for (int r = 0; r < localRows; ++r) {
+        double sum = 0.0;
+        int rowOffset = r * cols;
+        for (int c = 0; c < cols; ++c) {
+            sum += localMatrix[rowOffset + c] * localVector[c];
+        }
+        localResult[r] = sum;
+    }
+
+    // Собираем результаты
+    MPI_Gather(localResult, localRows, MPI_DOUBLE,
+               result, localRows, MPI_DOUBLE,
+               ROOT_PROCESS, MPI_COMM_WORLD);
 
     double end = MPI_Wtime();
-    double localTime = end - start, globalTime = 0.0;
+    double localTime = end - start;
+    double globalTime = 0.0;
     MPI_Reduce(&localTime, &globalTime, 1, MPI_DOUBLE, MPI_MAX, ROOT_PROCESS, MPI_COMM_WORLD);
 
-    if (commRank == ROOT_PROCESS)
-    {
+    if (commRank == ROOT_PROCESS) {
         std::cout << "------------------------------------------------" << std::endl;
         std::cout << "Matrix-Vector multiplication (row-wise, MPI)" << std::endl;
         std::cout << "> Processes         <=> " << commSize << std::endl;
         std::cout << "> Matrix size       <=> " << rows << " x " << cols << std::endl;
         std::cout << "> Execution time    <=> " << globalTime << 's' << std::endl;
         std::cout << "------------------------------------------------" << std::endl;
-
-        std::fstream file{ outputFile, std::ios::ate };
-        if (file)
-        {
-            std::stringstream methodName;
-            methodName << "mul_cols_" << rows << '_' << cols;
-            file << std::format("{},{},{}\n", methodName.str(), commSize, globalTime);
-        }
     }
 
-    delete[] localMatrix; 
+    // Освобождаем память
+    delete[] localMatrix;
     delete[] localResult;
-    if (commRank == ROOT_PROCESS)
-    {
-        delete[] vector; delete[] matrix; delete[] result;
+    delete[] localVector;
+    
+    if (commRank == ROOT_PROCESS) {
+        delete[] matrix;
+        delete[] vector;
+        delete[] result;
     }
 
     MPI_Finalize();
-}
-
-int DistributeMatrixRows(int rows, int cols, double* matrix, double* vector, int commRank, int commSize, double** localMatrix)
-{
-    int* rowCounts = nullptr;
-    int* rowDispls = nullptr;
-
-    ComputeCountsDispls(rows, commSize, &rowCounts, &rowDispls);
-
-    int* sendCounts = new int[commSize];
-    int* displs     = new int[commSize];
-    for (int i = 0; i < commSize; i++)
-    {
-        sendCounts[i] = rowCounts[i] * cols; 
-        displs[i]     = rowDispls[i] * cols; 
-    }
-
-    int localRows = rowCounts[commRank];
-    *localMatrix = new double[localRows * cols];
-
-    MPI_Scatterv(matrix,
-        sendCounts, displs, MPI_DOUBLE,
-        *localMatrix, localRows * cols, MPI_DOUBLE,
-        ROOT_PROCESS, MPI_COMM_WORLD);
-
-    delete[] rowCounts;
-    delete[] rowDispls;
-    delete[] sendCounts;
-    delete[] displs;
-
-    std::cout << localRows << std::endl;
-    return localRows;
-}
-
-
-void MultiplyMatrixVectorRows(int localRows, int cols, double* localMatrix, double* vector, double** localResult)
-{
-    *localResult = new double[localRows];
-    for (int r = 0; r < localRows; ++r) 
-    {
-        double sum = 0.0;
-        int rowOffset = r * cols;
-        for (int c = 0; c < cols; ++c) {
-            sum += localMatrix[rowOffset + c] * vector[c];
-        }
-        (*localResult)[r] = sum;
-    }
-}
-
-void ComputeCountsDispls(int totalCols, int commSize, int** counts, int** displs)
-{
-    int base = totalCols / commSize;
-    int rem = totalCols % commSize;
-    int offset = 0;
-
-    *counts = new int[commSize];
-    *displs = new int[commSize];
-
-    for (int i = 0; i < commSize; i++)
-    {
-        (*counts)[i] = base + (i < rem ? 1 : 0);
-        (*displs)[i] = offset;
-        offset += (*counts)[i];
-    }
-}
-
-void FillMatrixVectorRows(int rows, int cols, double* matrix, double* vector)
-{
-    std::srand(static_cast<int>(std::time({})));
-    for (int i = 0; i < rows * cols; i++)
-    {
-        matrix[i] = static_cast<double>(std::rand());
-    }
-    for (int i = 0; i < rows; i++)
-    {
-        vector[i] = static_cast<double>(std::rand());
-    }
+    return 0;
 }

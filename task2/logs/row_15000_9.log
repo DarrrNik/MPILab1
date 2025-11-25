@@ -1,0 +1,85 @@
+1667
+1667
+1667
+1667
+1667
+1666
+1666
+1667
+1666
+[MacBook-Air-Kirill-3:12846] *** Process received signal ***
+[MacBook-Air-Kirill-3:12846] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12846] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12846] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12846] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12846] [ 1] 0   MPILab1_task2-row                   0x00000001008fad54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12846] [ 2] 0   MPILab1_task2-row                   0x00000001008fa554 main + 564
+[MacBook-Air-Kirill-3:12846] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12846] *** End of error message ***
+[MacBook-Air-Kirill-3:12844] *** Process received signal ***
+[MacBook-Air-Kirill-3:12844] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12844] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12844] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12844] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12844] [ 1] 0   MPILab1_task2-row                   0x0000000102a96d54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12844] [ 2] 0   MPILab1_task2-row                   0x0000000102a96554 main + 564
+[MacBook-Air-Kirill-3:12844] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12844] *** End of error message ***
+[MacBook-Air-Kirill-3:12845] *** Process received signal ***
+[MacBook-Air-Kirill-3:12845] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12845] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12845] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12845] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12845] [ 1] 0   MPILab1_task2-row                   0x00000001026f6d54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12845] [ 2] 0   MPILab1_task2-row                   0x00000001026f6554 main + 564
+[MacBook-Air-Kirill-3:12845] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12845] *** End of error message ***
+[MacBook-Air-Kirill-3:12849] *** Process received signal ***
+[MacBook-Air-Kirill-3:12849] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12849] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12849] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12849] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12849] [ 1] 0   MPILab1_task2-row                   0x0000000100632d54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12849] [ 2] 0   MPILab1_task2-row                   0x0000000100632554 main + 564
+[MacBook-Air-Kirill-3:12849] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12849] *** End of error message ***
+[MacBook-Air-Kirill-3:12850] *** Process received signal ***
+[MacBook-Air-Kirill-3:12850] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12850] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12850] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12850] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12850] [ 1] 0   MPILab1_task2-row                   0x0000000100ad6d54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12850] [ 2] 0   MPILab1_task2-row                   0x0000000100ad6554 main + 564
+[MacBook-Air-Kirill-3:12850] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12850] *** End of error message ***
+[MacBook-Air-Kirill-3:12843] *** Process received signal ***
+[MacBook-Air-Kirill-3:12843] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12843] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12843] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12843] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12843] [ 1] 0   MPILab1_task2-row                   0x0000000102f9ad54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12843] [ 2] 0   MPILab1_task2-row                   0x0000000102f9a554 main + 564
+[MacBook-Air-Kirill-3:12843] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12843] *** End of error message ***
+[MacBook-Air-Kirill-3:12848] *** Process received signal ***
+[MacBook-Air-Kirill-3:12848] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12848] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12848] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12848] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12848] [ 1] 0   MPILab1_task2-row                   0x00000001003bad54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12848] [ 2] 0   MPILab1_task2-row                   0x00000001003ba554 main + 564
+[MacBook-Air-Kirill-3:12848] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12848] *** End of error message ***
+[MacBook-Air-Kirill-3:12847] *** Process received signal ***
+[MacBook-Air-Kirill-3:12847] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12847] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12847] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12847] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12847] [ 1] 0   MPILab1_task2-row                   0x00000001025c2d54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12847] [ 2] 0   MPILab1_task2-row                   0x00000001025c2554 main + 564
+[MacBook-Air-Kirill-3:12847] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12847] *** End of error message ***
+--------------------------------------------------------------------------
+prterun noticed that process rank 2 with PID 12844 on node MacBook-Air-Kirill-3 exited on
+signal 11 (Segmentation fault: 11).
+--------------------------------------------------------------------------

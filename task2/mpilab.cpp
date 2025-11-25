@@ -10,7 +10,7 @@
 
 int ParseCLArguments(int argc, char** argv, int commRank, int* rows, int* cols, char** outputFile)
 {
-    constexpr int EXPECTED_ARGS = 3; //"имя программы", "строки", "столбцы"
+    constexpr int EXPECTED_ARGS = 3;
     constexpr int ARG_ROWS = 1;
     constexpr int ARG_COLS = 2;
     constexpr int ARG_OUTPUT_FILE = 3;

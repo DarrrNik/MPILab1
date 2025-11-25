@@ -18,7 +18,6 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &commRank);
     MPI_Comm_size(MPI_COMM_WORLD, &commSize);
 
-    // Проверяем аргументы командной строки
     if (argc < 3) {
         if (commRank == ROOT_PROCESS) {
             std::cerr << "Usage: " << argv[0] << " <rows> <cols>" << std::endl;
@@ -38,7 +37,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Для блочного распределения нужна квадратная сетка процессов
     int gridSize = static_cast<int>(std::sqrt(commSize));
     if (gridSize * gridSize != commSize) {
         if (commRank == ROOT_PROCESS) {
@@ -49,7 +47,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Проверяем делимость на gridSize
     if (rows % gridSize != 0 || cols % gridSize != 0) {
         if (commRank == ROOT_PROCESS) {
             std::cerr << "Error: rows and cols must be divisible by sqrt(processes)" << std::endl;
@@ -59,7 +56,6 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Выделяем память для ROOT процесса
     double* matrix = nullptr;
     double* vector = nullptr; 
     double* result = nullptr;
@@ -70,10 +66,8 @@ int main(int argc, char* argv[])
             vector = new double[cols];
             result = new double[rows];
             
-            // Инициализируем данные
             FillMatrixVectorBlocks(rows, cols, matrix, vector);
             
-            // Инициализируем результат нулями
             for (int i = 0; i < rows; i++) {
                 result[i] = 0.0;
             }
@@ -82,14 +76,12 @@ int main(int argc, char* argv[])
             MPI_Abort(MPI_COMM_WORLD, 1);
         }
     } else {
-        // Не-ROOT процессы выделяют память только для результата
         result = new double[rows];
         for (int i = 0; i < rows; i++) {
             result[i] = 0.0;
         }
     }
 
-    // Распределяем данные
     double* localMatrix = nullptr;
     double* localVector = nullptr;
     double* localResult = nullptr;
@@ -101,10 +93,8 @@ int main(int argc, char* argv[])
     MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
 
-    // Умножаем локальную часть
     MultiplyMatrixVectorBlocks(localRows, localCols, localMatrix, localVector, &localResult);
     
-    // Собираем результаты
     GatherResultsBlocks(localResult, result, commRank, commSize, rows, cols, localRows, localCols);
 
     double end = MPI_Wtime();
@@ -123,7 +113,6 @@ int main(int argc, char* argv[])
         std::cout << "------------------------------------------------" << std::endl;
     }
 
-    // Освобождаем память
     delete[] localMatrix; 
     delete[] localVector; 
     delete[] localResult;
@@ -159,19 +148,15 @@ void DistributeMatrixBlocks(int rows, int cols, double* matrix, double* vector,
 {
     int gridSize = static_cast<int>(std::sqrt(commSize));
     
-    // Вычисляем координаты процесса в сетке
     int rowCoord = commRank / gridSize;
     int colCoord = commRank % gridSize;
     
-    // Вычисляем локальные размеры
     *localRows = rows / gridSize;
     *localCols = cols / gridSize;
     
-    // Выделяем память для локальных данных
     *localMatrix = new double[(*localRows) * (*localCols)];
     *localVector = new double[*localCols];
     
-    // Инициализируем нулями
     for (int i = 0; i < (*localRows) * (*localCols); i++) {
         (*localMatrix)[i] = 0.0;
     }
@@ -180,26 +165,20 @@ void DistributeMatrixBlocks(int rows, int cols, double* matrix, double* vector,
     }
 
     if (commRank == ROOT_PROCESS) {
-        // ROOT процесс распределяет данные
-        
-        // Сначала распределяем вектор (каждому процессу в столбце нужна своя часть вектора)
         for (int proc = 0; proc < commSize; proc++) {
             int procRow = proc / gridSize;
             int procCol = proc % gridSize;
             int startCol = procCol * (*localCols);
             
             if (proc == ROOT_PROCESS) {
-                // Копируем часть вектора для ROOT процесса
                 for (int c = 0; c < *localCols; c++) {
                     (*localVector)[c] = vector[startCol + c];
                 }
             } else {
-                // Отправляем часть вектора другим процессам
                 MPI_Send(&vector[startCol], *localCols, MPI_DOUBLE, proc, 0, MPI_COMM_WORLD);
             }
         }
         
-        // Затем распределяем матрицу по блокам
         for (int proc = 0; proc < commSize; proc++) {
             int procRow = proc / gridSize;
             int procCol = proc % gridSize;
@@ -207,7 +186,6 @@ void DistributeMatrixBlocks(int rows, int cols, double* matrix, double* vector,
             int startCol = procCol * (*localCols);
             
             if (proc == ROOT_PROCESS) {
-                // Копируем блок матрицы для ROOT процесса
                 for (int r = 0; r < *localRows; r++) {
                     for (int c = 0; c < *localCols; c++) {
                         (*localMatrix)[r * (*localCols) + c] = 
@@ -215,7 +193,6 @@ void DistributeMatrixBlocks(int rows, int cols, double* matrix, double* vector,
                     }
                 }
             } else {
-                // Отправляем блок матрицы другим процессам
                 double* sendBuffer = new double[(*localRows) * (*localCols)];
                 for (int r = 0; r < *localRows; r++) {
                     for (int c = 0; c < *localCols; c++) {
@@ -228,12 +205,8 @@ void DistributeMatrixBlocks(int rows, int cols, double* matrix, double* vector,
             }
         }
     } else {
-        // Не-ROOT процессы получают данные
-        
-        // Получаем часть вектора
         MPI_Recv(*localVector, *localCols, MPI_DOUBLE, ROOT_PROCESS, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         
-        // Получаем блок матрицы
         MPI_Recv(*localMatrix, (*localRows) * (*localCols), MPI_DOUBLE, ROOT_PROCESS, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
 }
@@ -244,12 +217,10 @@ void MultiplyMatrixVectorBlocks(int localRows, int localCols,
 {
     *localResult = new double[localRows];
     
-    // Инициализируем результат нулями
     for (int r = 0; r < localRows; r++) {
         (*localResult)[r] = 0.0;
     }
     
-    // Умножаем локальный блок матрицы на локальную часть вектора
     for (int r = 0; r < localRows; r++) {
         for (int c = 0; c < localCols; c++) {
             (*localResult)[r] += localMatrix[r * localCols + c] * localVector[c];
@@ -264,9 +235,6 @@ void GatherResultsBlocks(double* localResult, double* result,
     int gridSize = static_cast<int>(std::sqrt(commSize));
     
     if (commRank == ROOT_PROCESS) {
-        // ROOT процесс собирает результаты
-        
-        // Сначала копируем свой локальный результат
         int rowCoord = commRank / gridSize;
         int colCoord = commRank % gridSize;
         int startRow = rowCoord * localRows;
@@ -275,7 +243,6 @@ void GatherResultsBlocks(double* localResult, double* result,
             result[startRow + r] = localResult[r];
         }
         
-        // Затем получаем результаты от других процессов
         for (int proc = 1; proc < commSize; proc++) {
             int procRow = proc / gridSize;
             int procCol = proc % gridSize;
@@ -291,7 +258,6 @@ void GatherResultsBlocks(double* localResult, double* result,
             delete[] recvBuffer;
         }
     } else {
-        // Не-ROOT процессы отправляют свои результаты ROOT процессу
         MPI_Send(localResult, localRows, MPI_DOUBLE, ROOT_PROCESS, 2, MPI_COMM_WORLD);
     }
 }

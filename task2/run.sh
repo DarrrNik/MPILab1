@@ -4,14 +4,12 @@ echo "========================================="
 echo "  Matrix-Vector Multiplication Benchmark"
 echo "========================================="
 
-# Создаем директории
 mkdir -p results
 mkdir -p plots
 mkdir -p executables
 
 echo "[1/4] Compiling programs..."
 
-# Компилируем все три версии
 mpic++ -O3 -o executables/matrix_vector_rows row.cpp mpilab.cpp -lm
 mpic++ -O3 -o executables/matrix_vector_cols col.cpp mpilab.cpp -lm
 mpic++ -O3 -o executables/matrix_vector_blocks block.cpp mpilab.cpp -lm
@@ -24,7 +22,7 @@ fi
 echo "Compilation successful!"
 
 # Параметры тестирования
-MATRIX_SIZES=(9000 18000 27000 36000)
+MATRIX_SIZES=(9000 18000 27000)
 PROCESSES_LIST=(1 4 9)
 METHODS=("rows" "cols" "blocks")
 RESULTS_FILE="results/benchmark_results.csv"

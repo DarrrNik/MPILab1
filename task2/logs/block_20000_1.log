@@ -1,0 +1,6 @@
+------------------------------------------------
+Matrix-Vector multiplication (block-wise, MPI)
+> Processes         <=> 1
+> Matrix size       <=> 20000 x 20000
+> Execution time    <=> 0.949743s
+------------------------------------------------

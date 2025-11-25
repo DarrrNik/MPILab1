@@ -1,0 +1,35 @@
+3750
+3750
+3750
+3750
+[MacBook-Air-Kirill-3:12756] *** Process received signal ***
+[MacBook-Air-Kirill-3:12756] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12756] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12756] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12756] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12756] [ 1] 0   MPILab1_task2-row                   0x000000010429ed54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12756] [ 2] 0   MPILab1_task2-row                   0x000000010429e554 main + 564
+[MacBook-Air-Kirill-3:12756] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12756] *** End of error message ***
+[MacBook-Air-Kirill-3:12757] *** Process received signal ***
+[MacBook-Air-Kirill-3:12757] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12757] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12757] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12757] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12757] [ 1] 0   MPILab1_task2-row                   0x0000000104242d54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12757] [ 2] 0   MPILab1_task2-row                   0x0000000104242554 main + 564
+[MacBook-Air-Kirill-3:12757] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12757] *** End of error message ***
+[MacBook-Air-Kirill-3:12758] *** Process received signal ***
+[MacBook-Air-Kirill-3:12758] Signal: Segmentation fault: 11 (11)
+[MacBook-Air-Kirill-3:12758] Signal code: Invalid permissions (2)
+[MacBook-Air-Kirill-3:12758] Failing at address: 0x0
+[MacBook-Air-Kirill-3:12758] [ 0] 0   libsystem_platform.dylib            0x0000000181c73744 _sigtramp + 56
+[MacBook-Air-Kirill-3:12758] [ 1] 0   MPILab1_task2-row                   0x0000000104dded54 _Z24MultiplyMatrixVectorRowsiiPdS_PS_ + 60
+[MacBook-Air-Kirill-3:12758] [ 2] 0   MPILab1_task2-row                   0x0000000104dde554 main + 564
+[MacBook-Air-Kirill-3:12758] [ 3] 0   dyld                                0x00000001818a1d54 start + 7184
+[MacBook-Air-Kirill-3:12758] *** End of error message ***
+--------------------------------------------------------------------------
+prterun noticed that process rank 1 with PID 12756 on node MacBook-Air-Kirill-3 exited on
+signal 11 (Segmentation fault: 11).
+--------------------------------------------------------------------------

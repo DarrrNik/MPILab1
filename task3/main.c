@@ -88,8 +88,8 @@ double cannon_matrix_multiply(int n, int grid_size, int my_rank) {
             for (int j = 0; j < block_size; j++) {
                 double sum = 0.0;
                 for (int k = 0; k < block_size; k++) {
-                    volatile double a_val = local_A[i * block_size + k];
-                    volatile double b_val = local_B[k * block_size + j];
+                    double a_val = local_A[i * block_size + k];
+                    double b_val = local_B[k * block_size + j];
                     sum += a_val * b_val;
                 }
                 local_C[i * block_size + j] += sum;

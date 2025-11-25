@@ -100,6 +100,16 @@ int DistributeMatrixRows(int rows, int cols, double* matrix, double* vector, int
 void MultiplyMatrixVectorRows(int rows, int localCols, double* localMatrix, double* localVector, double** localResult);
 
 /**
+* @brief Заполнение матрицы и вектора случайными элементами (для блочного метода)
+*
+* @param[in]	rows        Количество строк в матрице
+* @param[in]	cols        Количество столбцов в матрице
+* @param[out]	matrix		Заполненная матрица
+* @param[out]	vector		Заполненный вектор
+*/
+void FillMatrixVectorBlocks(int rows, int cols, double* matrix, double* vector);
+
+/**
 * @brief Распределение блоков по процессам
 *
 * @param[in]	rows        Количество строк в матрице
@@ -110,21 +120,42 @@ void MultiplyMatrixVectorRows(int rows, int localCols, double* localMatrix, doub
 * @param[in]    commSize    Общее количество процессов
 * @param[out]	localMatrix Матрица текущего процесса
 * @param[out]	localVector Вектор текущего процесса
-*
-* @return Количество строк в матрице текущего процесса
+* @param[out]	localRows   Количество строк в блоке текущего процесса
+* @param[out]	localCols   Количество столбцов в блоке текущего процесса
 */
-int DistributeMatrixBlocks(int rows, int cols, double* matrix, double* vector, int commRank, int commSize, double** localMatrix, double** localVector);
+void DistributeMatrixBlocks(int rows, int cols, double* matrix, double* vector, 
+                           int commRank, int commSize, 
+                           double** localMatrix, double** localVector,
+                           int* localRows, int* localCols);
 
 /**
 * @brief Перемножение матрицы на вектор (блоками)
 *
-* @param[in]	rows        Количество строк в матрице
-* @param[in]	localCols   Количество столбцов в матрице
+* @param[in]	localRows   Количество строк в блоке текущего процесса
+* @param[in]	localCols   Количество столбцов в блоке текущего процесса
 * @param[in]	localMatrix Матрица текущего процесса
 * @param[in]	localVector Вектор текущего процесса
 * @param[out]	localResult Результирующая матрица
 */
-void MultiplyMatrixVectorBlocks(int rows, int localCols, double* localMatrix, double* localVector, double** localResult);
+void MultiplyMatrixVectorBlocks(int localRows, int localCols, 
+                               double* localMatrix, double* localVector, 
+                               double** localResult);
+
+/**
+* @brief Сбор результатов от всех процессов (для блочного метода)
+*
+* @param[in]	localResult Локальный результат текущего процесса
+* @param[out]	result      Итоговый результат (только для ROOT процесса)
+* @param[in]    commRank    Идентификатор текущего процесса
+* @param[in]    commSize    Общее количество процессов
+* @param[in]    rows        Общее количество строк
+* @param[in]    cols        Общее количество столбцов
+* @param[in]    localRows   Количество строк в блоке текущего процесса
+* @param[in]    localCols   Количество столбцов в блоке текущего процесса
+*/
+void GatherResultsBlocks(double* localResult, double* result,
+                        int commRank, int commSize,
+                        int rows, int cols, int localRows, int localCols);
 
 /**
 * @brief Подсчет колонок для каждого процесса

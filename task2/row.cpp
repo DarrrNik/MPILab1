@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cassert>
 #include <cstdlib>
+#include <ranges>
 
 #include "mpilab.hpp"
 
@@ -22,7 +23,7 @@ int main(int argc, char* argv[])
         if (parseRes != 0)
         {
             std::cout << "Invalid command line arguments, check error output" << std::endl;
-            return parseRes;
+            return -parseRes;
         }
     }
 
@@ -31,18 +32,18 @@ int main(int argc, char* argv[])
     {
         matrix = new double[rows * cols];
         vector = new double[rows];
-        result = new double[cols];
+        result = new double[rows];
         FillMatrixVectorRows(rows, cols, matrix, vector);
     }
 
     double* localMatrix = nullptr, * localResult = nullptr;
-    int localCols = DistributeMatrixRows(rows, cols, matrix, vector, commRank, commSize, &localMatrix);
+    int localRows = DistributeMatrixRows(rows, cols, matrix, vector, commRank, commSize, &localMatrix);
 
     MPI_Barrier(MPI_COMM_WORLD);
     double start = MPI_Wtime();
 
-    MultiplyMatrixVectorRows(rows, localCols, localMatrix, vector, &localResult);
-    MPI_Reduce(localResult, result, rows, MPI_DOUBLE, MPI_SUM, ROOT_PROCESS, MPI_COMM_WORLD);
+    MultiplyMatrixVectorRows(localRows, cols, localMatrix, vector, &localResult);
+    MPI_Reduce(localResult, result, localRows, MPI_DOUBLE, MPI_SUM, ROOT_PROCESS, MPI_COMM_WORLD);
 
     double end = MPI_Wtime();
     double localTime = end - start, globalTime = 0.0;
@@ -66,7 +67,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    delete[] localMatrix; delete[] localResult;
+    delete[] localMatrix; 
+    delete[] localResult;
     if (commRank == ROOT_PROCESS)
     {
         delete[] vector; delete[] matrix; delete[] result;
@@ -77,25 +79,48 @@ int main(int argc, char* argv[])
 
 int DistributeMatrixRows(int rows, int cols, double* matrix, double* vector, int commRank, int commSize, double** localMatrix)
 {
-    int* sendCounts = nullptr, * displs = nullptr;
-    ComputeCountsDispls(rows, commSize, &sendCounts, &displs);
+    int* rowCounts = nullptr;
+    int* rowDispls = nullptr;
 
-    int localRows = sendCounts[commRank];
+    ComputeCountsDispls(rows, commSize, &rowCounts, &rowDispls);
+
+    int* sendCounts = new int[commSize];
+    int* displs     = new int[commSize];
+    for (int i = 0; i < commSize; i++)
+    {
+        sendCounts[i] = rowCounts[i] * cols; 
+        displs[i]     = rowDispls[i] * cols; 
+    }
+
+    int localRows = rowCounts[commRank];
     *localMatrix = new double[localRows * cols];
 
-    MPI_Scatterv(matrix, sendCounts, displs, MPI_DOUBLE, *localMatrix, localRows, MPI_DOUBLE, ROOT_PROCESS, MPI_COMM_WORLD);
+    MPI_Scatterv(matrix,
+        sendCounts, displs, MPI_DOUBLE,
+        *localMatrix, localRows * cols, MPI_DOUBLE,
+        ROOT_PROCESS, MPI_COMM_WORLD);
 
-    delete[] sendCounts; delete[] displs;
+    delete[] rowCounts;
+    delete[] rowDispls;
+    delete[] sendCounts;
+    delete[] displs;
+
+    std::cout << localRows << std::endl;
     return localRows;
 }
+
 
 void MultiplyMatrixVectorRows(int localRows, int cols, double* localMatrix, double* vector, double** localResult)
 {
     *localResult = new double[localRows];
-    for (int i = 0; i < localRows; i++) {
-        for (int j = 0; j < cols; j++) {
-            (*localResult)[i] += localMatrix[i * cols + j] * vector[j];
+    for (int r = 0; r < localRows; ++r) 
+    {
+        double sum = 0.0;
+        int rowOffset = r * cols;
+        for (int c = 0; c < cols; ++c) {
+            sum += localMatrix[rowOffset + c] * vector[c];
         }
+        (*localResult)[r] = sum;
     }
 }
 

@@ -163,11 +163,11 @@ int main(int argc, char **argv) {
         MPI_Allreduce(&local_diff, &global_diff_sq, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
         global_diff = sqrt(global_diff_sq);
 
-        for (int i = 1; i <= nx_local; ++i) {
-            for (int j = 1; j <= ny_local; ++j) {
-                u_old[IDX(i,j,ny)] = u_new[IDX(i,j,ny)];
-            }
-        }
+        // for (int i = 1; i <= nx_local; ++i) {
+        //     for (int j = 1; j <= ny_local; ++j) {
+        //         u_old[IDX(i,j,ny)] = u_new[IDX(i,j,ny)];
+        //     }
+        // }
 
         if (my_rank == 0 && iter % 100 == 0) {
             printf("Iter %d, change = %.6e\n", iter, global_diff);
